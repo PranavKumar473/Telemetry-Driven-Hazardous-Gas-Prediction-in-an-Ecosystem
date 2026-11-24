@@ -15,3 +15,7 @@ data/telemetry.db-journal
 .idea/
 .DS_Store
 Thumbs.db
+# Generated data & model artifacts (reproducible via ml/ pipeline)
+data/
+models/
+.pytest_cache/

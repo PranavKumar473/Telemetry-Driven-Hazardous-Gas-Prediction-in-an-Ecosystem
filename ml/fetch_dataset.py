@@ -1,9 +1,6 @@
-from pathlib import Path
-import numpy as np
 import pandas as pd
 from ucimlrepo import fetch_ucirepo
-
-RAW_PATH = Path("data/raw/air_quality_raw.csv")
+from ml.config import RAW_PATH
 
 
 def main() -> None:
