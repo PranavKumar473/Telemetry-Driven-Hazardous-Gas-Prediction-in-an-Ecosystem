@@ -170,3 +170,4 @@ All predictions are evaluated in physical units ($\text{mg/m}^3$ for $\text{CO}$
 | **XGBoost** (9 Regressors, 39 tabular features) | 9 boosted trees | 0.593 | 13.225 ms | **0.660** | **22.941** | 3.709 |
 | **PyTorch Stacked LSTM** (`(1, 24, 16)` window) | 54,857 | **0.720** | 0.319 ms | 0.722 | 27.211 | 4.048 |
 | **PyTorch 1D-CNN + LSTM** (`(1, 24, 16)` window) | **30,345** | 0.714 | **0.129 ms** | 0.698 | 26.439 | **3.576** |
+# Telemetry-Driven-Hazardous-Gas-Prediction-in-an-Ecosystem
