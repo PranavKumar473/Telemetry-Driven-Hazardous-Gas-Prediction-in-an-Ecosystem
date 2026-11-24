@@ -1,11 +1,18 @@
 """Streamlit Live Monitoring & Multi-Model Benchmark Dashboard."""
 import json
+from pathlib import Path
+import sys
 import time
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import requests
 import streamlit as st
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from ml.config import MODELS_DIR
 
 API_BASE = "http://127.0.0.1:8000"
