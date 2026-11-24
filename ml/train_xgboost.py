@@ -1,13 +1,11 @@
 import json
-from pathlib import Path
 import joblib
+import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 from xgboost import XGBRegressor
-from ml.features import TARGET_GASES, HORIZONS, get_feature_columns
-
-PROCESSED_DIR = Path("data/processed")
-MODELS_DIR = Path("models")
+from ml.config import MODELS_DIR, PROCESSED_DIR
+from ml.features import HORIZONS, TARGET_GASES, get_feature_columns
 
 
 def main() -> None:
@@ -23,7 +21,7 @@ def main() -> None:
     with open(MODELS_DIR / "feature_cols.json", "w") as f:
         json.dump(feature_cols, f, indent=2)
 
-    print(f"Training XGBoost models on {len(feature_cols)} features...")
+    print(f"Training XGBoost on {len(train_df):,} train / {len(val_df):,} val rows x {len(feature_cols)} features...")
     for gas in TARGET_GASES:
         for h in HORIZONS:
             target_col = f"{gas}_target_{h}h"
@@ -39,27 +37,19 @@ def main() -> None:
                 random_state=42,
                 n_jobs=-1,
             )
-            model.fit(
-                X_train,
-                y_train,
-                eval_set=[(X_val, y_val)],
-                verbose=False,
-            )
+            model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
 
             out_path = MODELS_DIR / f"xgb_{gas}_{h}h.json"
             model.save_model(out_path)
-            print(f"  Saved {out_path.name} (best_iteration={model.best_iteration})")
+            val_mae = float(np.mean(np.abs(model.predict(X_val) - y_val)))
+            print(f"  {out_path.name:<20} best_iter={model.best_iteration:<4} val MAE={val_mae:.3f}")
 
-    print("\nTraining Isolation Forest anomaly detector...")
-    iso = IsolationForest(
-        n_estimators=150,
-        contamination=0.02,
-        random_state=42,
-        n_jobs=-1,
-    )
+    print("\nTraining Isolation Forest anomaly detector (train split only)...")
+    iso = IsolationForest(n_estimators=150, contamination=0.02, random_state=42, n_jobs=-1)
     iso.fit(X_train)
     joblib.dump(iso, MODELS_DIR / "isolation_forest.joblib")
-    print("  Saved isolation_forest.joblib")
+    val_flag_rate = float((iso.predict(X_val) == -1).mean())
+    print(f"  Saved isolation_forest.joblib (val anomaly rate={val_flag_rate:.1%})")
 
 
 if __name__ == "__main__":
